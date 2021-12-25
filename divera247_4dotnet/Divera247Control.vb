@@ -2,22 +2,44 @@
 Imports System.Text
 Imports System.Net
 Imports System.Net.Mail
+
 Public Class Divera247Control
 
     Public _DIVERA247API_KEY = ""
     Public _SMTP_HOST As String = ""
     Public _SMTP_PORT As Integer = 25
     Public _SMTP_SSL As Boolean = False
+    Public _SMTP_UseDefaultCredentials As Boolean = False
     Public _SMTP_CRED As New Net.NetworkCredential("", "")
     Public _SMTP_MailFrom As String = ""
 
-    Public Function _Init(ByVal _host As String, ByVal _port As Integer, ByVal _ssl As Boolean, ByVal _cred As Net.NetworkCredential, ByVal _mailfrom As String, ByVal _apikey As String)
+    Public Function _Init()
+        Dim RG As New Divera247Registry
+        _SMTP_HOST = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_HOST")
+        _SMTP_PORT = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_PORT")
+        _SMTP_SSL = CBool(RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_SSL"))
+        _SMTP_UseDefaultCredentials = CBool(RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_UseDefaultCredentials"))
+        Dim CRED As New NetworkCredential(RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_USER").ToString, RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_PASS").ToString)
+        _SMTP_CRED = CRED
+        _SMTP_MailFrom = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "SMTP_FROM")
+        _DIVERA247API_KEY = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "APIKEY")
+        Return True
+    End Function
+
+    Public Function _Init(ByVal _host As String, ByVal _port As Integer, ByVal _ssl As Boolean, ByVal _cred As Net.NetworkCredential, ByVal _mailfrom As String)
+        Dim RG As New Divera247Registry
         _SMTP_HOST = _host
         _SMTP_PORT = _port
         _SMTP_SSL = _ssl
         _SMTP_CRED = _cred
         _SMTP_MailFrom = _mailfrom
-        _DIVERA247API_KEY = _apikey
+        _DIVERA247API_KEY = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "APIKEY")
+        If _DIVERA247API_KEY = "" Then
+            RG._RegistryCreateKey("CURRENTUSER32", "", "DIVERA247")
+            RG._RegistrySetValue("CURRENTUSER32", "DIVERA247", "APIKEY", InputBox("Geben Sie hier Ihren API-Key ein:", "API-KEY eingeben", ""), "String")
+        Else
+            MsgBox(_DIVERA247API_KEY)
+        End If
         Return True
     End Function
 
@@ -85,7 +107,7 @@ Public Class Divera247Control
 
     End Function
 
-    Public Function _Alarm(ByVal _AlarmClass As Divera247Alarm)
+    Public Function SendAlarm(ByVal _AlarmClass As Divera247Alarm)
         _WebApiDivera247Alarm(_AlarmClass._ToJSON)
 
         If _AlarmClass.smtp_to <> "" Then
@@ -96,7 +118,7 @@ Public Class Divera247Control
     End Function
 
 
-    Public Function _News(ByVal _NewsClass As Divera247News)
+    Public Function SendNews(ByVal _NewsClass As Divera247News)
         _WebApiDivera247News(_NewsClass._ToJSON)
 
         If _NewsClass.smtp_to <> "" Then
@@ -111,7 +133,7 @@ Public Class Divera247Control
         Try
             Dim Smtp_Server As New SmtpClient
             Dim e_mail As New MailMessage()
-            Smtp_Server.UseDefaultCredentials = False
+            Smtp_Server.UseDefaultCredentials = _SMTP_UseDefaultCredentials
             Smtp_Server.Credentials = _SMTP_CRED
             Smtp_Server.Port = _SMTP_PORT
             Smtp_Server.EnableSsl = _SMTP_SSL
