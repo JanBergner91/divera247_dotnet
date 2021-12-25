@@ -26,20 +26,14 @@ Public Class Divera247Control
         Return True
     End Function
 
-    Public Function _Init(ByVal _host As String, ByVal _port As Integer, ByVal _ssl As Boolean, ByVal _cred As Net.NetworkCredential, ByVal _mailfrom As String)
+    Public Function _Init(ByVal _host As String, ByVal _port As Integer, ByVal _ssl As Boolean, ByVal _cred As Net.NetworkCredential, ByVal _mailfrom As String, ByVal _apikey As String)
         Dim RG As New Divera247Registry
         _SMTP_HOST = _host
         _SMTP_PORT = _port
         _SMTP_SSL = _ssl
         _SMTP_CRED = _cred
         _SMTP_MailFrom = _mailfrom
-        _DIVERA247API_KEY = RG._InternalRegistryGetValue("CURRENTUSER32", "DIVERA247", "APIKEY")
-        If _DIVERA247API_KEY = "" Then
-            RG._RegistryCreateKey("CURRENTUSER32", "", "DIVERA247")
-            RG._RegistrySetValue("CURRENTUSER32", "DIVERA247", "APIKEY", InputBox("Geben Sie hier Ihren API-Key ein:", "API-KEY eingeben", ""), "String")
-        Else
-            MsgBox(_DIVERA247API_KEY)
-        End If
+        _DIVERA247API_KEY = _apikey
         Return True
     End Function
 
