@@ -102,24 +102,24 @@ Public Class Divera247Control
     End Function
 
     Public Function SendAlarm(ByVal _AlarmClass As Divera247Alarm)
-        _WebApiDivera247Alarm(_AlarmClass._ToJSON)
+        Dim RESP As String = _WebApiDivera247Alarm(_AlarmClass._ToJSON)
 
         If _AlarmClass.smtp_to <> "" Then
             _SendMail(_AlarmClass.smtp_to, _AlarmClass.title, _AlarmClass._ToMAIL)
         End If
 
-        Return True
+        Return RESP
     End Function
 
 
     Public Function SendNews(ByVal _NewsClass As Divera247News)
-        _WebApiDivera247News(_NewsClass._ToJSON)
+        Dim RESP As String = _WebApiDivera247News(_NewsClass._ToJSON)
 
         If _NewsClass.smtp_to <> "" Then
             _SendMail(_NewsClass.smtp_to, _NewsClass.title, _NewsClass._ToMAIL)
         End If
 
-        Return True
+        Return RESP
     End Function
 
 
